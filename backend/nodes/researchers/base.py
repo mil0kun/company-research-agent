@@ -3,8 +3,8 @@ import logging
 import os
 from datetime import datetime
 from typing import Any, Dict, List
-
-from openai import AsyncOpenAI
+import groq
+# from openai import AsyncOpenAI
 from tavily import AsyncTavilyClient
 
 from ...classes import ResearchState
@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 class BaseResearcher:
     def __init__(self):
         tavily_key = os.getenv("TAVILY_API_KEY")
-        openai_key = os.getenv("OPENAI_API_KEY")
-        
-        if not tavily_key or not openai_key:
+        groq_key = os.getenv("GROP_API_KEY")
+
+        if not tavily_key or not groq_key:
             raise ValueError("Missing API keys")
             
         self.tavily_client = AsyncTavilyClient(api_key=tavily_key)
-        self.openai_client = AsyncOpenAI(api_key=openai_key)
+        self.groq_client = groq.Client(api_key=groq_key)
         self.analyst_type = "base_researcher"  # Default type
 
     @property
@@ -44,9 +44,9 @@ class BaseResearcher:
         
         try:
             logger.info(f"Generating queries for {company} as {self.analyst_type}")
-            
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4.1-mini",
+
+            response = self.groq_client.chat.completions.create(
+                model="compound-beta-mini",
                 messages=[
                     {
                         "role": "system",
@@ -60,57 +60,34 @@ class BaseResearcher:
                 ],
                 temperature=0,
                 max_tokens=4096,
-                stream=True
+                stream=False  # Set to False for await
             )
             
             queries = []
             current_query = ""
             current_query_number = 1
 
-            async for chunk in response:
-                if chunk.choices[0].finish_reason == "stop":
-                    break
-                    
-                content = chunk.choices[0].delta.content
-                if content:
-                    current_query += content
-                    
-                    # Stream the current state to the UI.
-                    if websocket_manager and job_id:
-                        await websocket_manager.send_status_update(
-                            job_id=job_id,
-                            status="query_generating",
-                            message="Generating research query",
-                            result={
-                                "query": current_query,
-                                "query_number": current_query_number,
-                                "category": self.analyst_type,
-                                "is_complete": False
-                            }
-                        )
-                    
-                    # If a newline is detected, treat it as a complete query.
-                    if '\n' in current_query:
-                        parts = current_query.split('\n')
-                        current_query = parts[-1]  # The last part is the start of the next query.
-                        
-                        for query in parts[:-1]:
-                            query = query.strip()
-                            if query:
-                                queries.append(query)
-                                if websocket_manager and job_id:
-                                    await websocket_manager.send_status_update(
-                                        job_id=job_id,
-                                        status="query_generated",
-                                        message="Generated new research query",
-                                        result={
-                                            "query": query,
-                                            "query_number": len(queries),
-                                            "category": self.analyst_type,
-                                            "is_complete": True
-                                        }
-                                    )
-                                current_query_number += 1
+            # Get the full content from the response
+            content = response.choices[0].message.content if response.choices else ""
+            queries = [q.strip() for q in content.split('\n') if q.strip()]
+
+            # Limit to at most 4 queries
+            queries = queries[:4]
+
+            # Optionally send status updates for each query
+            if websocket_manager and job_id:
+                for idx, query in enumerate(queries, 1):
+                    await websocket_manager.send_status_update(
+                        job_id=job_id,
+                        status="query_generated",
+                        message="Generated research query",
+                        result={
+                            "query": query,
+                            "query_number": idx,
+                            "category": self.analyst_type,
+                            "is_complete": True
+                        }
+                    )
 
             # Add any remaining query (even if not newline terminated)
             if current_query.strip():

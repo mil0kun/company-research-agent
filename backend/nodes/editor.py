@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 from langchain_core.messages import AIMessage
 from openai import AsyncOpenAI
+import groq
 
 from ..classes import ResearchState
 from ..utils.references import format_references_section
@@ -17,13 +18,13 @@ class Editor:
     """Compiles individual section briefings into a cohesive final report."""
     
     def __init__(self) -> None:
-        self.openai_key = os.getenv("OPENAI_API_KEY")
-        if not self.openai_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
-        
-        # Configure OpenAI
-        self.openai_client = AsyncOpenAI(api_key=self.openai_key)
-        
+        self.groq_key = os.getenv("GROP_API_KEY")
+        if not self.groq_key:
+            raise ValueError("GROP_API_KEY environment variable is not set")
+
+        # Configure Groq client
+        self.groq_client = groq.Client(api_key=self.groq_key)
+
         # Initialize context dictionary for use across methods
         self.context = {
             "company": "Unknown Company",
@@ -252,8 +253,8 @@ Strictly enforce this EXACT document structure:
 Return the report in clean markdown format. No explanations or commentary."""
         
         try:
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4.1",
+            response = await self.groq_client.chat.completions.create(
+                model="openai/gpt-oss-20b",
                 messages=[
                     {
                         "role": "system",
@@ -334,8 +335,8 @@ Return the polished report in flawless markdown format. No explanation.
 Return the cleaned report in flawless markdown format. No explanations or commentary."""
         
         try:
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4.1-mini", 
+            response = await self.groq_client.chat.completions.create(
+                model="openai/gpt-oss-20b", 
                 messages=[
                     {
                         "role": "system",
@@ -347,7 +348,7 @@ Return the cleaned report in flawless markdown format. No explanations or commen
                     }
                 ],
                 temperature=0,
-                stream=True
+                stream=False
             )
             
             accumulated_text = ""
