@@ -31,6 +31,9 @@ if command -v python3 >/dev/null 2>&1; then
     python_version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
     if [ "$(version_compare "$python_version")" -ge "$(version_compare "3.11")" ]; then
         echo -e "${GREEN}✓ Python $python_version is installed${NC}"
+    elif command -v python >/dev/null 2>&1; then
+        pycmd=python
+        echo -e "${GREEN}✓ Python $python_version is installed${NC}"
     else
         echo "❌ Python 3.11 or higher is required. Current version: $python_version"
         echo "Please install Python 3.11 or higher from https://www.python.org/downloads/"
@@ -71,14 +74,21 @@ use_venv=${use_venv:-Y}
 if [[ $use_venv =~ ^[Yy]$ ]]; then
     if [ "$use_uv" = true ]; then
         echo -e "\n${BLUE}Setting up Python virtual environment with uv...${NC}"
-        uv venv .venv
-        source .venv/bin/activate
-        echo -e "${GREEN}✓ Virtual environment created and activated with uv${NC}"
+    uv venv .venv
 
-        # Install Python dependencies with uv
-        echo -e "\n${BLUE}Installing Python dependencies with uv...${NC}"
-        uv pip install -r requirements.txt
-        echo -e "${GREEN}✓ Python dependencies installed${NC}"
+    # Detect OS and activate the correct venv path
+    if [ -f ".venv/bin/activate" ]; then
+        # Linux/Mac
+        source .venv/bin/activate
+    elif [ -f ".venv/Scripts/activate" ]; then
+        # Windows (Git Bash, PowerShell, CMD)
+        source .venv/Scripts/activate
+    else
+        echo "❌ Could not find virtual environment activation script."
+        exit 1
+    fi
+
+    echo -e "${GREEN}✓ Virtual environment created and activated with uv${NC}"
     else
         echo -e "\n${BLUE}Setting up Python virtual environment with pip...${NC}"
         python3 -m venv .venv
