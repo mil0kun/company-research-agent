@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github } from 'lucide-react';
+// import { Github } from 'lucide-react';
 
 interface HeaderProps {
   glassStyle: string;
@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ glassStyle }) => {
           Conduct in-depth company diligence powered by Tavily
         </p>
       </div>
-      <div className="absolute top-0 right-0 flex items-center space-x-2">
+      {/* <div className="absolute top-0 right-0 flex items-center space-x-2">
         <a
           href="https://tavily.com"
           target="_blank"
@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({ glassStyle }) => {
             }} 
           />
         </a>
-      </div>
+      </div> */}
     </div>
   );
 };
