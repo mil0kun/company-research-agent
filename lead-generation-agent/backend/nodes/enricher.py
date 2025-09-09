@@ -164,6 +164,13 @@ Extract and format the following information:
 
 Format your response as structured information that can be easily parsed. Only include information that is actually present in the content.
 """
+        
+        # Print the prompt for debugging
+        print(f"\n==== ENRICHMENT PROMPT FOR {analyst_type.upper()} DOCUMENT ====")
+        print(f"Title: {title}")
+        print(f"URL: {url}")
+        print(prompt)
+        print("=" * 50)
 
         response = groq_client.create(
             model="llama3-8b-8192",
@@ -178,6 +185,11 @@ Format your response as structured information that can be easily parsed. Only i
         
         # Extract the enriched content
         enriched_content = response.choices[0].message.content if response.choices else ""
+        
+        # Print the response for debugging
+        print(f"\n==== ENRICHMENT RESPONSE FOR {analyst_type.upper()} DOCUMENT ====")
+        print(enriched_content)
+        print("=" * 50)
         
         # Add the enriched content to the document
         enriched_doc["enriched_content"] = enriched_content

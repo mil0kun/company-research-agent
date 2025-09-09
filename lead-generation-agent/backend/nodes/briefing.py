@@ -61,7 +61,9 @@ async def briefing(state: Dict) -> Dict:
             )
         return state
     
-    groq_client = groq.Client(api_key=groq_key)
+    # Use mock Groq client
+    from ..nodes.researchers.base import MockGroqClient
+    groq_client = MockGroqClient(api_key=groq_key)
     
     # Generate briefings for each analyst type
     briefings = {}
@@ -125,9 +127,15 @@ Your task is to compile this information into a clear, structured briefing that:
 
 Focus on actionable information that can be used for lead generation. Be specific and practical.
 """
+
+        # Print the briefing prompt for debugging
+        print(f"\n==== BRIEFING PROMPT FOR {category_name.upper()} ====")
+        print("System: You are a lead generation specialist creating concise, actionable briefings for business development.")
+        print(f"User prompt (truncated to first 300 chars): {prompt[:300]}...")
+        print("=" * 50)
         
         try:
-            response = groq_client.chat.completions.create(
+            response = groq_client.chat.create(
                 model="llama3-8b-8192",
                 messages=[
                     {"role": "system", "content": "You are a lead generation specialist creating concise, actionable briefings for business development."},

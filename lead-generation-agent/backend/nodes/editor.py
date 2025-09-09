@@ -62,7 +62,9 @@ async def editor(state: Dict) -> Dict:
             )
         return state
     
-    groq_client = groq.Client(api_key=groq_key)
+    # Use mock Groq client
+    from ..nodes.researchers.base import MockGroqClient
+    groq_client = MockGroqClient(api_key=groq_key)
     
     # Get business context
     business_type = state.get("business_type", "Business")
@@ -114,9 +116,15 @@ Your task is to:
 
 Make sure the report is action-oriented, with clear recommendations for follow-up on the most promising leads.
 """
+
+    # Print the report generation prompt for debugging
+    print(f"\n==== FINAL REPORT GENERATION PROMPT ====")
+    print("System: You are a professional business development consultant compiling a comprehensive lead generation report.")
+    print(f"User prompt (truncated to first 300 chars): {prompt[:300]}...")
+    print("=" * 50)
     
     try:
-        response = groq_client.chat.completions.create(
+        response = groq_client.chat.create(
             model="llama3-8b-8192",
             messages=[
                 {"role": "system", "content": "You are a professional business development consultant compiling a comprehensive lead generation report."},

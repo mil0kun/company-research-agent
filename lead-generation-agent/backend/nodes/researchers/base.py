@@ -91,9 +91,28 @@ class MockGroqClient:
         prompt = next((m for m in messages if m["role"] == "user"), {}).get("content", "")
         system = next((m for m in messages if m["role"] == "system"), {}).get("content", "")
         
-        # Check if this is an enrichment request
-        if "Extract the most relevant information" in prompt:
-            # Generate mock enriched content
+        # Based on the system message and prompt content, determine what kind of response to generate
+        
+        # If this is a query generation request
+        if "You are researching leads" in system and "Generate search queries" in prompt:
+            if "wedding" in prompt.lower():
+                content = """wedding photographers in Penang Malaysia 2024
+wedding venues in Penang for photography packages
+best wedding photo album providers Penang
+affordable wedding photography packages Penang Malaysia"""
+            elif "tech" in prompt.lower() or "software" in prompt.lower():
+                content = """tech startups in Malaysia seeking development partners
+software companies in Penang hiring developers
+IT consulting firms Penang Malaysia 2024
+enterprise software buyers in Penang Malaysia"""
+            else:
+                content = """Mock lead generation query 1: Potential clients in Penang
+Mock lead generation query 2: Industry partners in Malaysia
+Mock lead generation query 3: Events and conferences in Penang 2024
+Mock lead generation query 4: Business directories in Malaysia"""
+        
+        # If this is an enrichment request
+        elif "Extract the most relevant information" in prompt:
             if "wedding" in prompt.lower():
                 content = """Names: Penang Wedding Studio, Sunshine Photography
 Contact: info@penangwedding.com, +60 4-555-1234
@@ -118,22 +137,127 @@ Social Media: @mockcompany (Twitter)
 Address: 123 Mock Street, Mock City
 Good Lead: Matches the target customer profile and has expressed interest in similar services
 Additional Details: Recent expansion suggests increased budget for services"""
-        # Otherwise this is a query generation request
-        elif "wedding" in system.lower():
-            content = """wedding photographers in Penang Malaysia 2024
-wedding venues in Penang for photography packages
-best wedding photo album providers Penang
-affordable wedding photography packages Penang Malaysia"""
-        elif "tech" in system.lower() or "software" in system.lower():
-            content = """tech startups in Malaysia seeking development partners
-software companies in Penang hiring developers
-IT consulting firms Penang Malaysia 2024
-enterprise software buyers in Penang Malaysia"""
+        
+        # If this is a briefing request
+        elif "lead generation specialist" in system and "Create a concise, actionable briefing" in prompt:
+            content = """# Direct Leads Summary
+
+## Overview
+We've identified several promising direct leads for your wedding photography business in Penang, Malaysia. These potential clients align well with your target market of budget-conscious couples seeking professional quality within the RM1,500-RM3,000 range.
+
+## Identified Leads
+
+### Penang Wedding Studio
+- **Contact**: info@penangwedding.com, +60 4-555-1234
+- **Website**: www.penangweddingstudio.com
+- **Social Media**: @penangwedding (Instagram), Penang Wedding Studio (Facebook)
+- **Address**: 123 Beach Street, Georgetown, Penang
+- **Notes**: Currently looking for photography partners for their wedding planning services. They work with many budget-conscious couples.
+
+### Sunshine Photography
+- **Contact**: hello@sunshinephotos.my, +60 4-777-8899
+- **Website**: www.sunshinephotos.my
+- **Social Media**: @sunshinephotos.my (Instagram)
+- **Address**: 45 Armenian Street, Georgetown, Penang
+- **Notes**: Specializes in wedding albums but may be looking to expand their photographer network.
+
+## Next Steps
+1. Send personalized emails to both leads introducing your services
+2. Follow up with phone calls within 3 days of emails
+3. Offer a special partnership discount for first-time referrals
+4. Request in-person meetings to showcase your portfolio
+
+## Outreach Template
+"Hello [Name], I discovered your wedding services in Penang and noticed you work with couples in the RM1,500-RM3,000 budget range. My photography packages complement your offerings, and I'd love to discuss potential collaboration. I'm available to meet and show my portfolio at your convenience."
+"""
+        
+        # If this is a final report generation request
+        elif "business development consultant" in system and "Compile the following lead generation briefings" in prompt:
+            content = """# Executive Summary
+
+This lead generation report identifies potential opportunities for your Wedding Photography business in Penang, Malaysia. Our research targeted budget-conscious couples seeking professional services within the RM1,500-RM3,000 range, with a focus on local Penang clients who value tangible keepsakes like physical photo albums.
+
+**Key Highlights:**
+- 8 direct client leads who match your ideal customer profile
+- 5 potential partnership opportunities with wedding planners and venues
+- 3 community platforms where engaged couples actively seek vendors
+- 4 upcoming wedding events in Penang for potential networking
+- 2 local influencers who could showcase your work
+
+## Direct Leads
+
+### Overview
+We've identified several promising direct leads for your wedding photography business in Penang, Malaysia. These potential clients align well with your target market of budget-conscious couples seeking professional quality within the RM1,500-RM3,000 range.
+
+### Identified Leads
+
+#### Penang Wedding Studio
+- **Contact**: info@penangwedding.com, +60 4-555-1234
+- **Website**: www.penangweddingstudio.com
+- **Social Media**: @penangwedding (Instagram), Penang Wedding Studio (Facebook)
+- **Address**: 123 Beach Street, Georgetown, Penang
+- **Notes**: Currently looking for photography partners for their wedding planning services. They work with many budget-conscious couples.
+
+#### Sunshine Photography
+- **Contact**: hello@sunshinephotos.my, +60 4-777-8899
+- **Website**: www.sunshinephotos.my
+- **Social Media**: @sunshinephotos.my (Instagram)
+- **Address**: 45 Armenian Street, Georgetown, Penang
+- **Notes**: Specializes in wedding albums but may be looking to expand their photographer network.
+
+### Next Steps
+1. Send personalized emails to both leads introducing your services
+2. Follow up with phone calls within 3 days of emails
+3. Offer a special partnership discount for first-time referrals
+4. Request in-person meetings to showcase your portfolio
+
+## Potential Partners
+
+### Overview
+These wedding planners and venues in Penang frequently work with couples in your target budget range and are looking for reliable photography partners to recommend to their clients.
+
+### Identified Partners
+
+#### Georgetown Wedding Planners
+- **Contact**: partners@georgetownweddings.my, +60 4-222-3333
+- **Website**: www.georgetownweddings.my
+- **Notes**: Handles 30+ weddings per year, primarily for local couples with mid-range budgets.
+
+#### Eastern & Oriental Hotel
+- **Contact**: events@eopenang.com, +60 4-111-2222
+- **Website**: www.eohotels.com/penang
+- **Notes**: Historic venue offering wedding packages in the RM10,000-RM15,000 range but without dedicated photographers.
+
+### Next Steps
+1. Create a partner-specific portfolio showcasing your best work
+2. Offer commission structure for successful referrals
+3. Schedule face-to-face meetings with event coordinators
+
+## Next Steps & Action Plan
+
+### Immediate Actions (Next 7 Days)
+1. Contact top 3 direct leads via email and phone
+2. Reach out to Georgetown Wedding Planners to schedule a meeting
+3. Join the Penang Wedding Community Facebook group
+
+### Short-Term Actions (30 Days)
+1. Attend the Penang Wedding Expo on October 15th
+2. Develop partner-specific marketing materials
+3. Contact remaining leads with personalized outreach
+
+### Long-Term Strategy (90 Days)
+1. Build relationships with all identified partners
+2. Create a tracking system for lead conversion rates
+3. Develop a referral program for satisfied clients
+
+This report serves as your roadmap for lead generation efforts over the coming months. Focus on direct leads first, then partnerships, and utilize community platforms for ongoing visibility.
+"""
         else:
-            content = """Mock lead generation query 1: Potential clients in Penang
-Mock lead generation query 2: Industry partners in Malaysia
-Mock lead generation query 3: Events and conferences in Penang 2024
-Mock lead generation query 4: Business directories in Malaysia"""
+            # Default response for any other prompt
+            content = """This is a mock response from the Groq client.
+For debugging purposes only.
+In a production environment, this would be a detailed, context-aware response.
+"""
             
         return MockResponse(content=content)
 
@@ -185,6 +309,16 @@ class BaseLeadResearcher:
         
         try:
             logger.info(f"Generating queries as {self.analyst_type} for {business_type} in {location}")
+            
+            # Format the prompt with our parameters
+            formatted_prompt = self._format_query_prompt(prompt, business_type, location, target_customers, outreach_channels, current_year)
+            
+            # Print the full formatted prompt for debugging
+            print(f"\n==== PROMPT FOR {self.analyst_type.upper()} ====")
+            print(f"System: You are researching leads for a {business_type} business in {location}.")
+            print(f"User: Researching potential leads on {datetime.now().strftime('%B %d, %Y')}.")
+            print(formatted_prompt)
+            print("=" * 50)
 
             response = self.groq_client.chat.create(
                 model="llama3-8b-8192",
@@ -196,7 +330,7 @@ class BaseLeadResearcher:
                     {
                         "role": "user",
                         "content": f"""Researching potential leads on {datetime.now().strftime("%B %d, %Y")}.
-{self._format_query_prompt(prompt, business_type, location, target_customers, outreach_channels, current_year)}"""
+{formatted_prompt}"""
                     }
                 ],
                 temperature=0,
@@ -375,98 +509,54 @@ class BaseLeadResearcher:
                 }
             )
 
-        # Prepare all search parameters upfront
-        search_params = {
-            "search_depth": "basic",
-            "include_raw_content": False,
-            "max_results": 5
-        }
+        # Print the queries for debugging
+        print(f"\n==== SEARCH QUERIES FOR {self.analyst_type.upper()} ====")
+        for idx, query in enumerate(queries, 1):
+            print(f"{idx}. {query}")
+        print("=" * 50)
 
-        if websocket_manager and job_id:
-            await websocket_manager.send_status_update(
-                job_id=job_id,
-                status="search_started",
-                message=f"Using Tavily to search for {len(queries)} queries",
-                result={
-                    "step": "Searching",
-                    "total_queries": len(queries)
-                }
-            )
+        # Skip actual Tavily API calls in debugging phase
+        print(f"SKIPPING TAVILY API CALLS FOR {self.analyst_type} - Using mock data instead")
             
-        # Create all API calls and execute them in a loop
-        # since we now have a synchronous client
+        # Create mock documents instead of calling Tavily API
         merged_docs = {}
-        for query in queries:
-            try:
-                # Use our mock client
-                result = self.tavily_client.search(query, **search_params)
+        for i, query in enumerate(queries):
+            # Create 2-3 mock documents per query to reduce volume but still test functionality
+            for j in range(min(2, len(queries))):
+                mock_url = f"https://example.com/mock-{self.analyst_type}-query{i+1}-doc{j+1}"
                 
-                # Print debug info
-                print(f"Search results for '{query}': {len(result.get('results', []))} results")
+                # Create more specific mock content based on analyst type
+                if self.analyst_type == "direct_leads_analyst":
+                    title = f"Potential Customer Lead for {query}"
+                    content = f"This is a simulated potential customer for a {state.get('business_type')} business in {state.get('location')}. Found via query: {query}"
+                elif self.analyst_type == "partnership_analyst":
+                    title = f"Potential Partnership Opportunity for {query}"
+                    content = f"This is a simulated partnership opportunity for a {state.get('business_type')} business in {state.get('location')}. Found via query: {query}"
+                elif self.analyst_type == "community_analyst":
+                    title = f"Community Platform for {query}"
+                    content = f"This is a simulated online community where {state.get('business_type')} businesses can engage with potential customers in {state.get('location')}. Found via query: {query}"
+                elif self.analyst_type == "events_analyst":
+                    title = f"Upcoming Event: {query}"
+                    content = f"This is a simulated event related to {state.get('business_type')} in {state.get('location')} happening in 2024. Found via query: {query}"
+                elif self.analyst_type == "influencer_analyst":
+                    title = f"Industry Influencer for {query}"
+                    content = f"This is a simulated influencer in the {state.get('business_type')} industry in {state.get('location')} with a significant following. Found via query: {query}"
+                else:
+                    title = f"Mock Result for {query}"
+                    content = f"This is a generic mock result for {self.analyst_type}. Found via query: {query}"
                 
-                for item in result.get("results", []):
-                    if not item.get("content") or not item.get("url"):
-                        continue
-                        
-                    url = item.get("url")
-                    title = item.get("title", "")
-                    
-                    if title:
-                        title = clean_title(title)
-                        if title.lower() == url.lower() or not title.strip():
-                            title = ""
-
-                    merged_docs[url] = {
-                        "title": title,
-                        "content": item.get("content", ""),
-                        "query": query,
-                        "url": url,
-                        "source": "web_search",
-                        "score": item.get("score", 0.0),
-                        "analyst_type": self.analyst_type
-                    }
-                    
-                # ALWAYS add at least one mock document per query to ensure the flow continues
-                if not result.get("results", []):
-                    mock_url = f"https://example.com/mock-{self.analyst_type}-{hash(query) % 1000}"
-                    merged_docs[mock_url] = {
-                        "title": f"Mock Result for {self.analyst_type}",
-                        "content": f"This is mock content for query: {query}. Generated for {self.analyst_type}.",
-                        "query": query,
-                        "url": mock_url,
-                        "source": "web_search",
-                        "score": 0.9,  # High score to ensure it passes filtering
-                        "analyst_type": self.analyst_type
-                    }
-                    print(f"Added mock document for query '{query}' with URL {mock_url}")
-                    
-            except Exception as e:
-                logger.error(f"Error searching query '{query}': {e}")
-                
-                # Add a mock document even on error
-                mock_url = f"https://example.com/error-{self.analyst_type}-{hash(query) % 1000}"
                 merged_docs[mock_url] = {
-                    "title": f"Error Result for {self.analyst_type}",
-                    "content": f"This is a placeholder for query: {query} that encountered an error: {str(e)}",
+                    "title": title,
+                    "content": content,
                     "query": query,
                     "url": mock_url,
                     "source": "web_search",
-                    "score": 0.85,
+                    "score": 0.9 - (j * 0.1),  # Vary scores a bit
                     "analyst_type": self.analyst_type
                 }
-                print(f"Added error document for query '{query}' with URL {mock_url}")
                 
-                if websocket_manager and job_id:
-                    await websocket_manager.send_status_update(
-                        job_id=job_id,
-                        status="query_error",
-                        message=f"Search failed for: {query}",
-                        result={
-                            "step": "Searching",
-                            "query": query,
-                            "error": str(e)
-                        }
-                    )
+                # Print mock document for debugging
+                print(f"Created mock document: {title} for {self.analyst_type}")
 
         # Send completion status
         if websocket_manager and job_id:
@@ -481,8 +571,9 @@ class BaseLeadResearcher:
                 }
             )
             
-        print(f"Total documents for {self.analyst_type}: {len(merged_docs)}")
+        print(f"Total mock documents for {self.analyst_type}: {len(merged_docs)}")
         if merged_docs:
             print(f"Sample document URLs: {list(merged_docs.keys())[:2]}")
-
+            
+        # Ensure documents are properly merged into state
         return merged_docs
