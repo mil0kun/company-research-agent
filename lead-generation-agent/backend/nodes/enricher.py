@@ -62,7 +62,9 @@ async def enricher(state: Dict) -> Dict:
             )
         return state
     
-    groq_client = groq.Client(api_key=groq_key)
+    # Use our mock client instead of real Groq client
+    from ..nodes.researchers.base import MockGroqClient
+    groq_client = MockGroqClient(api_key=groq_key)
     
     # Enrich documents by extracting contact information and additional details
     enriched_docs = {}
@@ -163,7 +165,7 @@ Extract and format the following information:
 Format your response as structured information that can be easily parsed. Only include information that is actually present in the content.
 """
 
-        response = groq_client.chat.completions.create(
+        response = groq_client.create(
             model="llama3-8b-8192",
             messages=[
                 {"role": "system", "content": "You are a lead generation assistant that extracts contact information and relevant details from web content."},

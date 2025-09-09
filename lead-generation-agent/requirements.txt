@@ -1,12 +1,23 @@
+# API and Web
 fastapi==0.115.11
 uvicorn==0.28.0
 python-dotenv==1.0.1
-pydantic==2.6.4
-langgraph==0.0.40
-groq==0.5.4
-tavily-python==0.3.1
-asyncio==3.4.3
 websockets==12.0
 python-multipart==0.0.7
+
+# LLM Dependencies
+pydantic==2.11.7  # Using version with pre-built wheels
+pydantic-core==2.33.2  # Using version with pre-built wheels
+# tiktoken excluded - compatibility issues with Python 3.13
+# You can run "pip install tiktoken --prefer-binary" separately if needed
+
+# LLM and Search
+langgraph==0.0.40
+groq==0.6.0
+# Modified tavily-python to not require tiktoken
+tavily-python==0.3.1
+asyncio==3.4.3
+
+# Utilities
 markdown2==2.5.0
 pymongo==4.6.2

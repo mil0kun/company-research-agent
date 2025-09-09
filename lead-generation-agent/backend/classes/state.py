@@ -9,6 +9,9 @@ class ResearchState(dict):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Initialize documents dictionary if not present
+        if "documents" not in self:
+            self["documents"] = {}
         
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -70,7 +73,25 @@ class ResearchState(dict):
         """
         if "documents" not in self:
             self["documents"] = {}
+        
+        # Debug print for transparency
+        print(f"Merging {len(docs)} documents into state. Current docs: {len(self['documents'])}")
+        
+        # Keep track of before and after counts for debugging
+        before_count = len(self["documents"])
+        
+        # Update the documents dictionary
         self["documents"].update(docs)
+        
+        # Print confirmation of update
+        after_count = len(self["documents"])
+        print(f"After merge: {after_count} documents in state (added {after_count - before_count})")
+        
+        # For debugging, print a few keys
+        if docs:
+            print(f"Sample merged document keys: {list(docs.keys())[:3]}")
+            if "documents" in self:
+                print(f"Sample state document keys: {list(self['documents'].keys())[:3]}")
         
     def get_all_analyst_docs(self) -> Dict[str, Dict[str, Dict[str, Any]]]:
         """
